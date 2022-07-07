@@ -9,6 +9,8 @@ object CookingStageService {
 
     private var cookingSteps = mutableListOf<CookingStage>()
 
+    var targetCookingStep: CookingStage? = null
+
     private val listeners = mutableSetOf<CookingStepListener>()
 
     fun getCookingSteps(): List<CookingStage> {
@@ -17,6 +19,7 @@ object CookingStageService {
 
     fun setCookingStepsList(cookingStepsList: MutableList<CookingStage>) {
         cookingSteps = cookingStepsList
+        notifyChanges()
     }
 
     fun deleteCookingStep(cookingStep: CookingStage) {
@@ -32,15 +35,15 @@ object CookingStageService {
             if (cookingSteps.isNotEmpty()) {
                 val newId = cookingSteps.maxOf { it.id } + 1
                 cookingSteps.add(cookingStep.copy(id = newId))
-            } else cookingSteps.add(cookingStep.copy(id = 1))
+            } else cookingSteps.add(cookingStep.copy(id = CookingStage.UNDEFINED_ID + 1))
             notifyChanges()
         } else editCookingStep(cookingStep)
     }
 
     fun editCookingStep(cookingStep: CookingStage) {
-        cookingSteps.replaceAll {
+        cookingSteps = cookingSteps.map {
             if (it.id == cookingStep.id) cookingStep else it
-        }
+        } as MutableList<CookingStage>
         notifyChanges()
     }
 

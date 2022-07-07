@@ -34,18 +34,16 @@ class RecipeDetailsCookingStage :
             this.cookingStage = cookingStage
             with(binding) {
                 cookingStageDescription.text = cookingStage.descript
+                cookingStageOptions.visibility = View.GONE
                 stage.text = "Stage ${adapterPosition + 1}"
-                if (cookingStage.stageImageUri == null) {
-                    stagePreview.visibility = View.GONE
-                } else {
+                if (cookingStage.stageImageUri !== null) {
                     stagePreview.visibility = View.VISIBLE
                     Glide.with(binding.stagePreview)
                         .asDrawable()
                         .load(cookingStage.stageImageUri)
-                        .error(R.mipmap.ic_launcher_recipe)
+                        .error(R.drawable.ic_baseline_image_not_supported_24)
                         .into(binding.stagePreview)
-                }
-                cookingStageOptions.visibility = View.GONE
+                } else stagePreview.visibility = View.GONE
             }
         }
     }

@@ -10,7 +10,7 @@ data class Cuisine(
 ) : Parcelable {
 
     companion object {
-        var selectedKitchenList = mutableListOf<Cuisine>(
+        var selectedKitchenList = mutableListOf(
             Cuisine("European", true),
             Cuisine("Asian", true),
             Cuisine("Pan-Asian", true),

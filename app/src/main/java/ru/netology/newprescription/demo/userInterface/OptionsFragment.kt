@@ -60,7 +60,7 @@ class OptionsFragment : Fragment() {
             findItem(R.id.search_button).isVisible = false
             findItem(R.id.filter_button).isVisible = false
             findItem(R.id.add_button).isVisible = false
-            findItem(R.id.clear_button).isVisible = false
+            findItem(R.id.cancel_button).isVisible = false
             findItem(R.id.ok_button).isVisible = true
         }
     }
@@ -90,12 +90,13 @@ class OptionsFragment : Fragment() {
         const val SAVED_SETTINGS = "savedContent"
         private const val DEFAULT_VALUE_FOR_SAVED_SETTINGS = ""
 
-        fun initSettings() : List<Cuisine> {
+        fun initSettings(): List<Cuisine> {
             val gson = Gson()
             val prefs = MyApp.appContext?.getSharedPreferences(SAVED_SETTINGS, Context.MODE_PRIVATE)
             val type: Type = object : TypeToken<List<Cuisine>?>() {}.type
             val list = prefs?.getString(SAVED_SETTINGS, DEFAULT_VALUE_FOR_SAVED_SETTINGS)
-            val selectedKitchenList = gson.fromJson<List<Cuisine>>(list, type) ?: Cuisine.selectedKitchenList.toList()
+            val selectedKitchenList =
+                gson.fromJson<List<Cuisine>>(list, type) ?: Cuisine.selectedKitchenList.toList()
             Cuisine.selectedKitchenList = selectedKitchenList as MutableList<Cuisine>
             return selectedKitchenList
         }

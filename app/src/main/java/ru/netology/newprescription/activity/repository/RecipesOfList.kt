@@ -5,6 +5,8 @@ import ru.netology.newprescription.activity.Recipe
 
 interface RecipesOfList {
 
+    val data: LiveData<List<Recipe>>
+
     fun addRecipe(recipe: Recipe)
 
     fun deleteRecipe(recipe: Recipe)
@@ -13,11 +15,9 @@ interface RecipesOfList {
 
     fun getRecipe(recipeId: Int): Recipe
 
-    fun getRecipeList(): LiveData<List<Recipe>>
+    fun getAllRecipes(): List<Recipe>
 
     fun isFavorite(recipeId: Int)
-
-    fun searchRecipe(request:String)
 
     companion object {
         const val CANCEL_SEARCH = "cancel search"

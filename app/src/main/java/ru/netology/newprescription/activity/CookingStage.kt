@@ -9,11 +9,11 @@ data class CookingStage(
     val descript: String,
     val uri: String? = null,
     val stageImageUri: Uri? = null,
-    val id: Int = UNDEFINED_ID
+    val id: Int
 
-):Parcelable {
+) : Parcelable {
 
     companion object {
-        const val UNDEFINED_ID = -1
+        const val UNDEFINED_ID = 0
     }
 }
