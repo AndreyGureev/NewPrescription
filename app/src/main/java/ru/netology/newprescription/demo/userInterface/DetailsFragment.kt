@@ -1,6 +1,7 @@
 package ru.netology.newprescription.demo.userInterface
 
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.widget.EditText
 import androidx.activity.addCallback
@@ -51,8 +52,8 @@ class DetailsFragment : Fragment() {
             findNavController().popBackStack()
         }
 
-        viewModel.recipeList.observe(viewLifecycleOwner) { recipeList ->
-            val recipe = recipeList.find { it.id == args.recipeId } ?: return@observe
+        viewModel.data.observe(viewLifecycleOwner) { recipeList ->
+            val recipe = recipeList.first { it.id == args.recipeId }
             with(binding) {
                 recipeItems.author.text = recipe.author
                 recipeItems.title.text = recipe.title
@@ -125,20 +126,19 @@ class DetailsFragment : Fragment() {
         with(menu) {
             findItem(R.id.search_button).isVisible = false
             findItem(R.id.filter_button).isVisible = false
-            findItem(R.id.clear_button).isVisible = false
+            findItem(R.id.cancel_button).isVisible = false
             findItem(R.id.add_button).isVisible = false
             findItem(R.id.ok_button).isVisible = false
             val myId = 2
-            val recipe = viewModel.recipeList.value?.find { it.id == args.recipeId }
-            when (recipe?.authorId) {
-                myId -> {
-                    findItem(R.id.edit_button).isVisible = true
-                    findItem(R.id.delete_button).isVisible = true
-                }
-                else -> {
-                    findItem(R.id.edit_button).isVisible = false
-                    findItem(R.id.delete_button).isVisible = false
-                }
+            Log.d("TAG", "recipe id is ${args.recipeId}")
+            val recipe = viewModel.getRecipeById(args.recipeId)
+            Log.d("TAG", "recipe id is $recipe")
+            if (recipe.authorId == myId) {
+                findItem(R.id.edit_button).isVisible = true
+                findItem(R.id.delete_button).isVisible = true
+            } else {
+                findItem(R.id.edit_button).isVisible = false
+                findItem(R.id.delete_button).isVisible = false
             }
         }
     }
@@ -146,16 +146,18 @@ class DetailsFragment : Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.delete_button -> {
-                val recipe =
-                    viewModel.recipeList.value?.find { it.id == args.recipeId } ?: return true
+                val recipe = viewModel.data.value?.find { it.id == args.recipeId } ?: return false
                 viewModel.onDeleteClicked(recipe)
                 findNavController().popBackStack()
                 true
             }
             R.id.edit_button -> {
-                val recipe =
-                    viewModel.recipeList.value?.find { it.id == args.recipeId } ?: return true
+                val recipe = viewModel.data.value?.find { it.id == args.recipeId } ?: return false
                 viewModel.onEditClicked(recipe)
+                true
+            }
+            R.id.cancel_button -> {
+                findNavController().popBackStack()
                 true
             }
             else -> super.onOptionsItemSelected(item)

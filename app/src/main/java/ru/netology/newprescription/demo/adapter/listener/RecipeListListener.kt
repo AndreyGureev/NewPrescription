@@ -8,10 +8,6 @@ interface RecipeListListener {
 
     fun onRecipeClicked(recipe: Recipe)
 
-    fun onSearchClicked(request: String)
-
     fun onAddClicked()
-
-    fun onCancelClicked()
 
 }

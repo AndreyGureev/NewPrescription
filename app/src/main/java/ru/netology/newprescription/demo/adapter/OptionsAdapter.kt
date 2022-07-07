@@ -7,7 +7,7 @@ import ru.netology.newprescription.activity.Cuisine
 import ru.netology.newprescription.databinding.ItemOptionsBinding
 
 
-class OptionsAdapter() : RecyclerView.Adapter<OptionsAdapter.SettingHolder>() {
+class OptionsAdapter : RecyclerView.Adapter<OptionsAdapter.SettingHolder>() {
 
     var selectedKitchenList: MutableList<Cuisine> = mutableListOf()
         get() = Cuisine.selectedKitchenList

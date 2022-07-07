@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
@@ -25,12 +26,12 @@ class CookingStageEditorFragment : Fragment() {
 
     private val cookingStepService = CookingStageService
 
-    private var selectedCookingStepImageUri: Uri? = null
+    private var selectedCookingStageImageUri: Uri? = null
 
     private val selectImages: ActivityResultLauncher<String> =
         registerForActivityResult(ActivityResultContracts.GetContent()) { imageUri: Uri? ->
-            selectedCookingStepImageUri = imageUri
-            imageCookingStageUri = imageUri
+            selectedCookingStageImageUri = imageUri
+            imageCookingStagePreview = false
             view?.findViewById<ImageView>(R.id.stage_preview)?.setImageURI(imageUri)
             view?.findViewById<ImageButton>(R.id.add_preview_button)?.visibility = View.GONE
             view?.findViewById<ImageButton>(R.id.clear_preview_button)?.visibility = View.VISIBLE
@@ -43,7 +44,13 @@ class CookingStageEditorFragment : Fragment() {
         savedInstanceState: Bundle?
     ) = CookingStageEditorBinding.inflate(layoutInflater, container, false).also { binding ->
 
-        if (args.value !== null) {
+        requireActivity().onBackPressedDispatcher.addCallback(this) {
+            imageCookingStagePreview = false
+            selectedCookingStageImageUri = null
+            findNavController().popBackStack()
+        }
+
+        if (args.value.cookingStage !== null) {
             val step = args.value.cookingStage
             binding.descriptionStageEditText.setText(step?.descript)
             if (step?.stageImageUri == null) {
@@ -51,7 +58,6 @@ class CookingStageEditorFragment : Fragment() {
                 binding.addPreviewButton.visibility = View.VISIBLE
                 binding.clearPreviewButton.visibility = View.GONE
             } else {
-                imageCookingStagePreviewTag = null
                 binding.addPreviewButton.visibility = View.GONE
                 binding.clearPreviewButton.visibility = View.VISIBLE
                 Glide.with(binding.stagePreview)
@@ -62,25 +68,24 @@ class CookingStageEditorFragment : Fragment() {
             }
         } else {
             binding.clearPreviewButton.visibility = View.GONE
+            binding.stagePreview.setImageResource(R.drawable.ic_baseline_image_not_supported_24)
         }
 
         binding.clearPreviewButton.setOnClickListener {
             binding.stagePreview.setImageResource(R.drawable.ic_baseline_image_not_supported_24)
             binding.addPreviewButton.visibility = View.VISIBLE
             binding.clearPreviewButton.visibility = View.GONE
-            imageCookingStageUri = null
-            imageCookingStagePreviewTag = imageCookingStagePreviewIsEmptyTag
+            selectedCookingStageImageUri = null
+            imageCookingStagePreview = true
         }
 
         binding.cancelButton.setOnClickListener {
-            imageCookingStageUri = null
-            imageCookingStagePreviewTag = null
+            selectedCookingStageImageUri = null
+            imageCookingStagePreview = true
             findNavController().popBackStack()
         }
 
-        binding.cancelEditStepButton.setOnClickListener {
-            imageCookingStageUri = null
-            imageCookingStagePreviewTag = null
+        binding.clearDescriptionStepButton.setOnClickListener {
             binding.descriptionStageEditText.text?.clear()
         }
 
@@ -94,19 +99,21 @@ class CookingStageEditorFragment : Fragment() {
                 val step = CookingStage(
                     descript = newDescription.toString(),
                     stageImageUri = when {
-                        imageCookingStageUri !== null -> imageCookingStageUri
-                        imageCookingStagePreviewTag== imageCookingStagePreviewIsEmptyTag -> null
+                        imageCookingStagePreview -> null
+                        selectedCookingStageImageUri !== null -> selectedCookingStageImageUri
                         args.value.cookingStage?.stageImageUri !== null -> args.value.cookingStage?.stageImageUri
                         else -> null
                     },
-                    id = args.value.cookingStage?.id ?: -1
+                    id = args.value.cookingStage?.id ?: CookingStage.UNDEFINED_ID
                 )
                 cookingStepService.addCookingStep(step)
+                cookingStepService.targetCookingStep = null
+                imageCookingStageUri = null
                 findNavController().popBackStack()
             } else {
                 Toast.makeText(
                     context,
-                    "There is no description, the field is empty",
+                    getString(R.string.fill_in_the_content_text),
                     Toast.LENGTH_SHORT
                 ).show()
             }
@@ -115,11 +122,8 @@ class CookingStageEditorFragment : Fragment() {
     }.root
 
     companion object {
-        const val RESULT_KEY_NEW_STAGE = "add new stage"
-        const val ORDER_KEY = "order"
         const val RESULT_IMAGES = "image/*"
         var imageCookingStageUri: Uri? = null
-        var imageCookingStagePreviewTag : String? = null
-        const val imageCookingStagePreviewIsEmptyTag = "empty image preview"
+        var imageCookingStagePreview: Boolean = false
     }
 }
